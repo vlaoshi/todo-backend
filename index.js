@@ -1,4 +1,5 @@
 // 애플리케이션 진입점
+// 배포: 클라우드타입 (GitHub main 브랜치와 연동, 환경 변수는 클라우드타입 서비스 설정에서 관리)
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
