@@ -1,5 +1,6 @@
 // 애플리케이션 진입점
 // 배포: 클라우드타입 (GitHub main 브랜치와 연동, 환경 변수는 클라우드타입 서비스 설정에서 관리)
+// 코드를 main에 push하면 클라우드타입이 자동으로 다시 배포해요.
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
