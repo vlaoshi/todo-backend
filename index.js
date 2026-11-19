@@ -57,9 +57,13 @@ app.use(
 // JSON 요청 본문 파싱 (할 일·프로필 요청은 작아서 10kb로 제한해요)
 app.use(express.json({ limit: '10kb' }));
 
-// 서버 상태 확인용 라우트
+// 서버 상태 확인용 라우트: 몽고디비(Atlas) 연결 상태를 실제로 확인해서 알려줘요
+// (readyState 1 = 연결됨)
 app.get('/', (req, res) => {
-  res.json({ message: 'todo-backend 실행 중' });
+  if (mongoose.connection.readyState === 1) {
+    return res.json({ message: '새로운 클라우드 데이터베이스 연결 성공' });
+  }
+  res.status(503).json({ message: '데이터베이스에 연결되어 있지 않아요' });
 });
 
 // 서버 상태 확인용 (로그인 없이 접근 가능)
