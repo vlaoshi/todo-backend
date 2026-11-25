@@ -6,6 +6,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import todosRouter from './routers/todos.js';
 import profileRouter from './routers/profile.js';
+import routinesRouter from './routers/routines.js';
 import { initFirebase } from './lib/firebase.js';
 
 // .env 읽기: `node index.js`, `npm run dev` 어느 쪽으로 실행해도 적용돼요.
@@ -72,6 +73,9 @@ app.use('/api/todos', todosRouter);
 
 // 다마고치 프로필 API (로그인 필요)
 app.use('/api/profile', profileRouter);
+
+// 반복 할 일 API (로그인 필요)
+app.use('/api/routines', routinesRouter);
 
 // 에러 처리: 검증 실패는 400, 그 밖의 오류는 500
 // (Express 5는 async 라우터에서 난 에러도 자동으로 여기로 넘겨줘요)

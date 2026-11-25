@@ -67,6 +67,13 @@ const todoSchema = new mongoose.Schema(
       validate: { validator: Number.isInteger, message: '넘긴 횟수는 정수여야 해요' },
     },
 
+    // 반복 할 일에서 만들어졌다면 그 반복(Routine)의 id, 보통 할 일은 null
+    routineId: {
+      type: String,
+      default: null,
+      immutable: true,
+    },
+
     // 마감일 안에 완료해서 받은 보너스 XP (완료 해제 시 회수하려고 기억해 둬요)
     bonusXp: {
       type: Number,
@@ -100,5 +107,11 @@ todoSchema.pre('validate', function () {
 // 자주 쓰는 조회: "이 사용자의 특정 날짜 할 일" / "이 사용자의 할 일 최신순"
 todoSchema.index({ user: 1, date: 1 });
 todoSchema.index({ user: 1, createdAt: -1 });
+
+// 같은 날 같은 반복 할 일이 두 번 생기지 않게 막아요. (반복에서 온 할 일에만 적용)
+todoSchema.index(
+  { user: 1, routineId: 1, date: 1 },
+  { unique: true, partialFilterExpression: { routineId: { $type: 'string' } } }
+);
 
 export default mongoose.model('Todo', todoSchema);
