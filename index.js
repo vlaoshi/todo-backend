@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import todosRouter from './routers/todos.js';
 import profileRouter from './routers/profile.js';
 import routinesRouter from './routers/routines.js';
+import accountsRouter from './routers/accounts.js';
 import { initFirebase } from './lib/firebase.js';
 
 // .env 읽기: `node index.js`, `npm run dev` 어느 쪽으로 실행해도 적용돼요.
@@ -67,6 +68,9 @@ app.get('/', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({ ok: true });
 });
+
+// 가입 API (남은 자리 보기는 로그인 없이, 명단 등록은 Firebase 로그인 토큰 필요)
+app.use('/api/accounts', accountsRouter);
 
 // 할 일 API (로그인 필요)
 app.use('/api/todos', todosRouter);
