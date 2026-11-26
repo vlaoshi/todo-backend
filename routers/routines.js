@@ -27,10 +27,29 @@ router.get('/', async (req, res) => {
 });
 
 // 반복 만들기
-// 필수: text, days(요일 번호 배열), startDate
+// 필수: text, days(요일 번호 배열), startDate  /  선택: endDate(반복 종료일)
+// 선택: fromTodoId — 이미 있는 보통 할 일을 반복으로 바꿀 때, 그 할 일을 새 반복의 '그날 할 일'로 연결해요.
+//       (같은 날 똑같은 반복 할 일이 하나 더 생기지 않게요)
 router.post('/', async (req, res) => {
-  const { text, days, startDate } = req.body ?? {};
-  const routine = await Routine.create({ user: req.userId, text, days, startDate });
+  const { text, days, startDate, endDate, fromTodoId } = req.body ?? {};
+
+  // 바꿀 할 일이 내 것이고, 아직 반복에 연결되지 않은 보통 할 일인지 먼저 확인해요.
+  let fromTodo = null;
+  if (fromTodoId !== undefined && fromTodoId !== null) {
+    fromTodo = mongoose.isValidObjectId(fromTodoId)
+      ? await Todo.findOne({ _id: fromTodoId, user: req.userId, routineId: null })
+      : null;
+    if (!fromTodo) return res.status(404).json({ message: '반복으로 바꿀 할 일을 찾을 수 없어요' });
+  }
+
+  const routine = await Routine.create({ user: req.userId, text, days, startDate, endDate: endDate || null });
+
+  if (fromTodo) {
+    // routineId는 모델에서 '바꿀 수 없음(immutable)'으로 막아 둔 필드라,
+    // 이 경우에만 Mongoose를 거치지 않고 DB에 직접 연결 정보를 써요.
+    await Todo.collection.updateOne({ _id: fromTodo._id }, { $set: { routineId: String(routine._id) } });
+  }
+
   res.status(201).json(routine);
 });
 
@@ -43,12 +62,13 @@ router.post('/materialize', async (req, res) => {
     return res.status(400).json({ message: '날짜는 YYYY-MM-DD 형식이어야 해요' });
   }
 
-  // 반복 중이고, 그 요일이 들어 있고, 시작일이 지난 틀만 골라요.
+  // 반복 중이고, 그 요일이 들어 있고, 시작일이 지났고, 종료일이 아직 안 지난 틀만 골라요.
   const routines = await Routine.find({
     user: req.userId,
     active: true,
     days: weekdayOf(date),
     startDate: { $lte: date },
+    $or: [{ endDate: null }, { endDate: { $gte: date } }],
   });
 
   const now = new Date();

@@ -47,6 +47,15 @@ const routineSchema = new mongoose.Schema(
       match: [DATE_PATTERN, '날짜는 YYYY-MM-DD 형식이어야 해요'],
     },
 
+    // 반복이 끝나는 날 "YYYY-MM-DD" (이 날까지만 만들어요, 없으면 계속 반복)
+    // 빈 문자열("")이 오면 null로 저장해요.
+    endDate: {
+      type: String,
+      default: null,
+      set: (v) => (v === '' ? null : v),
+      match: [DATE_PATTERN, '날짜는 YYYY-MM-DD 형식이어야 해요'],
+    },
+
     // 반복 중인지 (반복 그만하기를 누르면 false, 이미 만든 할 일은 그대로 남아요)
     active: {
       type: Boolean,
@@ -70,5 +79,12 @@ const routineSchema = new mongoose.Schema(
 
 // 자주 쓰는 조회: "이 사용자의 반복 중인 틀"
 routineSchema.index({ user: 1, active: 1 });
+
+// 종료일은 시작일과 같거나 그 뒤여야 해요. (문자열 비교로 날짜 순서 비교 가능)
+routineSchema.pre('validate', function () {
+  if (this.endDate && this.endDate < this.startDate) {
+    this.invalidate('endDate', '반복 종료일은 시작일과 같거나 그 뒤로 정해 주세요');
+  }
+});
 
 export default mongoose.model('Routine', routineSchema);
