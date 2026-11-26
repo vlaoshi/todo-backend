@@ -2,7 +2,7 @@
 // Firebase의 users/{uid}/todos/{todoId} 하위 컬렉션을 별도 컬렉션으로 옮기고,
 // user 필드로 주인을 구분해요.
 import mongoose from 'mongoose';
-import { DATE_PATTERN, DATE_MESSAGE } from '../lib/validators.js';
+import { DATE_PATTERN, DATE_MESSAGE, TIME_PATTERN, TIME_MESSAGE } from '../lib/validators.js';
 
 const todoSchema = new mongoose.Schema(
   {
@@ -54,6 +54,14 @@ const todoSchema = new mongoose.Schema(
       default: null,
       set: (v) => (v === '' ? null : v),
       match: [DATE_PATTERN, DATE_MESSAGE],
+    },
+
+    // 하는 시간 (선택, "HH:MM"). 빈 문자열("")이 오면 null로 저장해요.
+    time: {
+      type: String,
+      default: null,
+      set: (v) => (v === '' ? null : v),
+      match: [TIME_PATTERN, TIME_MESSAGE],
     },
 
     // 다른 날로 넘긴 횟수 (넘길 때마다 XP -5)

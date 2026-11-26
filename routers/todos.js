@@ -8,7 +8,7 @@ import requireAuth from '../middleware/auth.js';
 const router = Router();
 
 // 클라이언트가 수정할 수 있는 필드 (user, createdAt 같은 필드는 바꿀 수 없어요)
-const EDITABLE_FIELDS = ['text', 'done', 'date', 'dueDate', 'carryCount', 'bonusXp', 'starred'];
+const EDITABLE_FIELDS = ['text', 'done', 'date', 'dueDate', 'time', 'carryCount', 'bonusXp', 'starred'];
 
 const isValidId = (id) => mongoose.isValidObjectId(id);
 
@@ -42,9 +42,9 @@ router.get('/:id', (req, res) => {
 });
 
 // 할 일 생성
-// 필수: text, date  /  선택: dueDate
+// 필수: text, date  /  선택: dueDate, time
 router.post('/', async (req, res) => {
-  const { text, date, dueDate } = req.body ?? {};
+  const { text, date, dueDate, time } = req.body ?? {};
 
   const todo = await Todo.create({
     user: req.userId,
@@ -52,6 +52,7 @@ router.post('/', async (req, res) => {
     date,
     originDate: date, // 처음 계획한 날 = 처음 하는 날
     dueDate: dueDate || null,
+    time: time || null,
   });
 
   res.status(201).json(todo);
