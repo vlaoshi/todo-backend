@@ -81,6 +81,12 @@ const todoSchema = new mongoose.Schema(
       min: [0, '보너스 XP는 0 이상이어야 해요'],
       validate: { validator: Number.isInteger, message: '보너스 XP는 정수여야 해요' },
     },
+
+    // 중요한 일 ⭐ (그날 목록 맨 위에 고정)
+    starred: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

@@ -8,7 +8,7 @@ import requireAuth from '../middleware/auth.js';
 const router = Router();
 
 // 클라이언트가 수정할 수 있는 필드 (user, createdAt 같은 필드는 바꿀 수 없어요)
-const EDITABLE_FIELDS = ['text', 'done', 'date', 'dueDate', 'carryCount', 'bonusXp'];
+const EDITABLE_FIELDS = ['text', 'done', 'date', 'dueDate', 'carryCount', 'bonusXp', 'starred'];
 
 const isValidId = (id) => mongoose.isValidObjectId(id);
 
