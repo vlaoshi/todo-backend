@@ -8,6 +8,7 @@ const router = Router();
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const XP_DELTA_LIMIT = 100;
+const ENGRAVING_MAX = 20; // 게임기 각인 글자 수 한도 (프론트와 같게)
 
 // 로그인한 사용자만 쓸 수 있어요. (Firebase 토큰 검사 후 req.userId 설정)
 router.use(requireAuth);
@@ -41,7 +42,8 @@ router.get('/', async (req, res) => {
 });
 
 // 내 프로필 변경
-// 본문: { xpDelta?: 정수(-100~100), lastCheckInDate?: "YYYY-MM-DD" | null }
+// 본문: { xpDelta?: 정수(-100~100), lastCheckInDate?: "YYYY-MM-DD" | null, engraving?: 문자열(20자까지) }
+//   engraving: 게임기에 새긴 문구. ""(빈 문자열)은 '안 새기기로 함'(기본 로고), 아직 안 물어봤으면 null
 // 그 밖의 필드(xp, stage, user 등)는 무시해요.
 router.patch('/', async (req, res) => {
   const body = req.body ?? {};
@@ -49,7 +51,9 @@ router.patch('/', async (req, res) => {
   // 입력 검사 (파이프라인 업데이트에는 스키마 검증이 적용되지 않아서 여기서 직접 해요)
   const hasDelta = 'xpDelta' in body;
   const hasCheckIn = 'lastCheckInDate' in body;
+  const hasEngraving = 'engraving' in body;
   const { xpDelta, lastCheckInDate } = body;
+  const engraving = typeof body.engraving === 'string' ? body.engraving.trim() : body.engraving;
 
   if (
     hasDelta &&
@@ -68,11 +72,14 @@ router.patch('/', async (req, res) => {
       .status(400)
       .json({ message: 'lastCheckInDate는 YYYY-MM-DD 형식이거나 null이어야 해요' });
   }
+  if (hasEngraving && !(typeof engraving === 'string' && engraving.length <= ENGRAVING_MAX)) {
+    return res.status(400).json({ message: `게임기 각인은 ${ENGRAVING_MAX}자까지 쓸 수 있어요` });
+  }
 
   // 원자적 업데이트 파이프라인 (단계는 위에서부터 차례로 적용돼요)
   // 1) xp에 변화량을 더하되 0 밑으로 내려가지 않게 해요. 새 문서면 xp가 없으니 0에서 시작해요.
   // 2) 바뀐 xp로 단계를 다시 계산해요.
-  // 3) 체크인 날짜와 시각 필드를 맞춰요.
+  // 3) 체크인 날짜, 게임기 각인, 시각 필드를 맞춰요.
   const pipeline = [
     {
       $set: {
@@ -85,6 +92,7 @@ router.patch('/', async (req, res) => {
         lastCheckInDate: hasCheckIn
           ? { $literal: lastCheckInDate }
           : { $ifNull: ['$lastCheckInDate', null] },
+        engraving: hasEngraving ? { $literal: engraving } : { $ifNull: ['$engraving', null] },
         createdAt: { $ifNull: ['$createdAt', '$$NOW'] },
         updatedAt: '$$NOW',
       },

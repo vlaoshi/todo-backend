@@ -68,6 +68,15 @@ const profileSchema = new mongoose.Schema(
       default: null,
       match: [DATE_PATTERN, '날짜는 YYYY-MM-DD 형식이어야 해요'],
     },
+
+    // 게임기에 새긴 문구 (예: "작심 30년!", "민지의 투두")
+    // null: 아직 안 물어봄 → 앱이 처음 열릴 때 각인 안내를 보여 줘요 / "": 안 새기기로 함(기본 로고)
+    engraving: {
+      type: String,
+      default: null,
+      trim: true,
+      maxlength: [20, '게임기 각인은 20자까지 쓸 수 있어요'],
+    },
   },
   {
     timestamps: true,
