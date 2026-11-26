@@ -4,6 +4,7 @@ import { Router } from 'express';
 import mongoose from 'mongoose';
 import Todo from '../models/Todo.js';
 import requireAuth from '../middleware/auth.js';
+import { DATE_PATTERN, DATE_MESSAGE } from '../lib/validators.js';
 
 const router = Router();
 
@@ -26,11 +27,26 @@ router.param('id', async (req, res, next, id) => {
 });
 
 // 할 일 목록 조회 (최신순)
-// GET /api/todos            → 전체
-// GET /api/todos?date=2026-11-16 → 그 날짜의 할 일만
+// GET /api/todos                               → 전체
+// GET /api/todos?date=2026-11-16               → 그 날짜의 할 일만
+// GET /api/todos?from=2026-10-28               → 그날 이후의 할 일 + 아직 안 끝낸 할 일 전부 (앱을 열 때)
+// GET /api/todos?from=2026-09-01&to=2026-10-28 → from 이상 to 미만 날짜의 할 일 (예전 기록 더 불러오기)
 router.get('/', async (req, res) => {
   const filter = { user: req.userId };
-  if (req.query.date) filter.date = String(req.query.date);
+  const { date, from, to } = req.query;
+  for (const value of [date, from, to]) {
+    if (value !== undefined && !DATE_PATTERN.test(String(value))) {
+      return res.status(400).json({ message: DATE_MESSAGE });
+    }
+  }
+  if (date) {
+    filter.date = String(date);
+  } else if (from && to) {
+    filter.date = { $gte: String(from), $lt: String(to) };
+  } else if (from) {
+    // 안 끝낸 일은 '지난 일 가져오기'·마감 지남·배고픔 계산에 필요해서 날짜와 상관없이 함께 보내요.
+    filter.$or = [{ date: { $gte: String(from) } }, { done: false }];
+  }
 
   const todos = await Todo.find(filter).sort({ createdAt: -1 });
   res.json(todos);
