@@ -3,8 +3,7 @@
 // - 실제로 체크하는 할 일(Todo)은 접속한 날짜에 이 틀을 보고 하나씩 만들어져요.
 //   (Todo.routineId로 어느 틀에서 왔는지 연결돼요)
 import mongoose from 'mongoose';
-
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+import { DATE_PATTERN, DATE_MESSAGE } from '../lib/validators.js';
 
 const routineSchema = new mongoose.Schema(
   {
@@ -44,7 +43,7 @@ const routineSchema = new mongoose.Schema(
     startDate: {
       type: String,
       required: true,
-      match: [DATE_PATTERN, '날짜는 YYYY-MM-DD 형식이어야 해요'],
+      match: [DATE_PATTERN, DATE_MESSAGE],
     },
 
     // 반복이 끝나는 날 "YYYY-MM-DD" (이 날까지만 만들어요, 없으면 계속 반복)
@@ -53,7 +52,7 @@ const routineSchema = new mongoose.Schema(
       type: String,
       default: null,
       set: (v) => (v === '' ? null : v),
-      match: [DATE_PATTERN, '날짜는 YYYY-MM-DD 형식이어야 해요'],
+      match: [DATE_PATTERN, DATE_MESSAGE],
     },
 
     // 반복 중인지 (반복 그만하기를 누르면 false, 이미 만든 할 일은 그대로 남아요)

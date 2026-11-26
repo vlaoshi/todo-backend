@@ -5,10 +5,9 @@ import mongoose from 'mongoose';
 import Routine from '../models/Routine.js';
 import Todo from '../models/Todo.js';
 import requireAuth from '../middleware/auth.js';
+import { DATE_PATTERN, DATE_MESSAGE } from '../lib/validators.js';
 
 const router = Router();
-
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 // "YYYY-MM-DD" → 요일 번호(0 일 ~ 6 토)
 // UTC로 계산해서 서버가 어느 시간대에 있든 같은 요일이 나와요.
@@ -59,7 +58,7 @@ router.post('/', async (req, res) => {
 router.post('/materialize', async (req, res) => {
   const date = String(req.body?.date ?? '');
   if (!DATE_PATTERN.test(date)) {
-    return res.status(400).json({ message: '날짜는 YYYY-MM-DD 형식이어야 해요' });
+    return res.status(400).json({ message: DATE_MESSAGE });
   }
 
   // 반복 중이고, 그 요일이 들어 있고, 시작일이 지났고, 종료일이 아직 안 지난 틀만 골라요.

@@ -2,10 +2,7 @@
 // Firebase의 users/{uid}/todos/{todoId} 하위 컬렉션을 별도 컬렉션으로 옮기고,
 // user 필드로 주인을 구분해요.
 import mongoose from 'mongoose';
-
-// 날짜 문자열 "YYYY-MM-DD" 규칙 (프론트엔드가 날짜를 이 형식으로 다뤄요)
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-const DATE_MESSAGE = '날짜는 YYYY-MM-DD 형식이어야 해요';
+import { DATE_PATTERN, DATE_MESSAGE } from '../lib/validators.js';
 
 const todoSchema = new mongoose.Schema(
   {

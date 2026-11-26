@@ -1,8 +1,7 @@
 // 다마고치 프로필 모델 (사용자마다 하나)
 // XP와 진화 단계, "지난 일 가져오기"를 물어본 날짜를 저장해요.
 import mongoose from 'mongoose';
-
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+import { DATE_PATTERN, DATE_MESSAGE } from '../lib/validators.js';
 
 // 진화 단계 기준: xp가 minXp 이상이면 그 단계예요. (minXp 오름차순)
 export const STAGES = [
@@ -66,7 +65,7 @@ const profileSchema = new mongoose.Schema(
     lastCheckInDate: {
       type: String,
       default: null,
-      match: [DATE_PATTERN, '날짜는 YYYY-MM-DD 형식이어야 해요'],
+      match: [DATE_PATTERN, DATE_MESSAGE],
     },
 
     // 게임기에 새긴 문구 (예: "작심 30년!", "민지의 투두")

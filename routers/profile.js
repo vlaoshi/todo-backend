@@ -3,10 +3,10 @@
 import { Router } from 'express';
 import requireAuth from '../middleware/auth.js';
 import Profile, { stageExpr } from '../models/Profile.js';
+import { DATE_PATTERN } from '../lib/validators.js';
 
 const router = Router();
 
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const XP_DELTA_LIMIT = 100;
 const ENGRAVING_MAX = 20; // 게임기 각인 글자 수 한도 (프론트와 같게)
 
